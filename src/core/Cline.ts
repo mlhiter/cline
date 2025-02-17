@@ -61,6 +61,7 @@ import { addUserInstructions } from "./prompts/system"
 import { OpenAiHandler } from "../api/providers/openai"
 import { ApiStream } from "../api/transform/stream"
 
+// 当前工作目录，如果没有的话默认是Desktop
 const cwd = vscode.workspace.workspaceFolders?.map((folder) => folder.uri.fsPath).at(0) ?? path.join(os.homedir(), "Desktop") // may or may not exist but fs checking existence would immediately ask for permission which would be bad UX, need to come up with a better solution
 
 type ToolResponse = string | Array<Anthropic.TextBlockParam | Anthropic.ImageBlockParam>
@@ -162,6 +163,7 @@ export class Cline {
 
 	// Storing task to disk for history
 
+	// ~/Library/Application\ Support/Code/User/globalStorage/扩展名/tasks/任务ID
 	private async ensureTaskDirectoryExists(): Promise<string> {
 		const globalStoragePath = this.providerRef.deref()?.context.globalStorageUri.fsPath
 		if (!globalStoragePath) {
@@ -172,6 +174,7 @@ export class Cline {
 		return taskDir
 	}
 
+	// tasks/任务ID/api_conversation_history.json
 	private async getSavedApiConversationHistory(): Promise<Anthropic.MessageParam[]> {
 		const filePath = path.join(await this.ensureTaskDirectoryExists(), GlobalFileNames.apiConversationHistory)
 		const fileExists = await fileExistsAtPath(filePath)
@@ -201,6 +204,7 @@ export class Cline {
 		}
 	}
 
+	// tasks/任务ID/ui_messages.json
 	private async getSavedClineMessages(): Promise<ClineMessage[]> {
 		const filePath = path.join(await this.ensureTaskDirectoryExists(), GlobalFileNames.uiMessages)
 		if (await fileExistsAtPath(filePath)) {
@@ -217,6 +221,7 @@ export class Cline {
 		return []
 	}
 
+	// 这里有关于上下文窗口维护的逻辑
 	private async addToClineMessages(message: ClineMessage) {
 		// these values allow us to reconstruct the conversation history at the time this cline message was created
 		// it's important that apiConversationHistory is initialized before we add cline messages
@@ -269,6 +274,7 @@ export class Cline {
 		}
 	}
 
+	// 回退检查点机制的核心代码
 	async restoreCheckpoint(messageTs: number, restoreType: ClineCheckpointRestore) {
 		const messageIndex = this.clineMessages.findIndex((m) => m.ts === messageTs)
 		const message = this.clineMessages[messageIndex]
@@ -362,6 +368,7 @@ export class Cline {
 		}
 	}
 
+	// 展示 diff 比较
 	async presentMultifileDiff(messageTs: number, seeNewChangesSinceLastTaskCompletion: boolean) {
 		const relinquishButton = () => {
 			this.providerRef.deref()?.postMessageToWebview({ type: "relinquishControl" })
@@ -474,6 +481,7 @@ export class Cline {
 		relinquishButton()
 	}
 
+	// 检查最新任务完成点（completion point）是否有新的文件变更，主要用于检查任务是否完成（即是否改变了文件）
 	async doesLatestTaskCompletionHaveNewChanges() {
 		const messageIndex = findLastIndex(this.clineMessages, (m) => m.say === "completion_result")
 		const message = this.clineMessages[messageIndex]
@@ -521,6 +529,7 @@ export class Cline {
 
 	// Communicate with webview
 
+	// 核心函数：ask 用于向用户发起请求并且等待相应，会阻塞并且等待用户反馈
 	// partial has three valid states true (partial message), false (completion of partial message), undefined (individual complete message)
 	async ask(
 		type: ClineAsk,
@@ -628,6 +637,7 @@ export class Cline {
 			await this.providerRef.deref()?.postStateToWebview()
 		}
 
+		// 等待用户响应
 		await pWaitFor(() => this.askResponse !== undefined || this.lastMessageTs !== askTs, { interval: 100 })
 		if (this.lastMessageTs !== askTs) {
 			throw new Error("Current ask promise was ignored") // could happen if we send multiple asks in a row i.e. with command_output. It's important that when we know an ask could fail, it is handled gracefully
@@ -649,6 +659,7 @@ export class Cline {
 		this.askResponseImages = images
 	}
 
+	// 核心函数：用于向用户展示信息，不需要等待用户响应
 	async say(type: ClineSay, text?: string, images?: string[], partial?: boolean): Promise<undefined> {
 		if (this.abort) {
 			throw new Error("Cline instance aborted")
@@ -672,6 +683,7 @@ export class Cline {
 					// this is a new partial message, so add it with partial state
 					const sayTs = Date.now()
 					this.lastMessageTs = sayTs
+					// 直接发送消息，不需要等待响应
 					await this.addToClineMessages({
 						ts: sayTs,
 						type: "say",
@@ -774,6 +786,7 @@ export class Cline {
 		)
 	}
 
+	// 恢复历史任务的函数：当用户想要继续之前中断的任务时，这个函数负责重建任务上下文并恢复对话状态。
 	private async resumeTaskFromHistory() {
 		// TODO: right now we let users init checkpoints for old tasks, assuming they're continuing them from the same workspace (which we never tied to tasks, so no way for us to know if it's opened in the right workspace)
 		// const doesShadowGitExist = await CheckpointTracker.doesShadowGitExist(this.taskId, this.providerRef.deref())
@@ -1210,6 +1223,7 @@ export class Cline {
 		return statusCode && !message.includes(statusCode.toString()) ? `${statusCode} - ${message}` : message
 	}
 
+	// 这是一个与 AI API 通信的请求函数，非常核心：提示词组装、上下文窗口管理和截取、API 流式处理
 	async *attemptApiRequest(previousApiReqIndex: number): ApiStream {
 		// Wait for MCP servers to be connected before generating system prompt
 		await pWaitFor(() => this.providerRef.deref()?.mcpHub?.isConnecting !== true, { timeout: 10_000 }).catch(() => {
@@ -1337,6 +1351,7 @@ export class Cline {
 		yield* iterator
 	}
 
+	// 非常核心的展示函数，用来展示 AI 助手的消息内容
 	async presentAssistantMessage() {
 		if (this.abort) {
 			throw new Error("Cline instance aborted")
@@ -1983,7 +1998,7 @@ export class Cline {
 								}
 								this.consecutiveMistakeCount = 0
 								const absolutePath = path.resolve(cwd, relDirPath)
-								const result = await parseSourceCodeForDefinitionsTopLevel(absolutePath)
+								const result = await parseSourceCodeForDefinitionsTopLevel(absolutePath) // 这个函数非常关键，用于解析源代码中的定义
 								const completeMessage = JSON.stringify({
 									...sharedMessageProps,
 									content: result,
@@ -2793,7 +2808,7 @@ export class Cline {
 		}
 
 		/*
-		Seeing out of bounds is fine, it means that the next too call is being built up and ready to add to assistantMessageContent to present. 
+		Seeing out of bounds is fine, it means that the next too call is being built up and ready to add to assistantMessageContent to present.
 		When you see the UI inactive during this, it means that a tool is breaking without presenting any UI. For example the write_to_file tool was breaking when relpath was undefined, and for invalid relpath it never presented UI.
 		*/
 		this.presentAssistantMessageLocked = false // this needs to be placed here, if not then calling this.presentAssistantMessage below would fail (sometimes) since it's locked
@@ -2823,6 +2838,7 @@ export class Cline {
 		}
 	}
 
+	// 非常核心的函数：用于递归处理与 AI 助手的交互循环
 	async recursivelyMakeClineRequests(
 		userContent: UserContent,
 		includeFileDetails: boolean = false,
@@ -2832,6 +2848,7 @@ export class Cline {
 			throw new Error("Cline instance aborted")
 		}
 
+		// 错误处理
 		if (this.consecutiveMistakeCount >= 3) {
 			if (this.autoApprovalSettings.enabled && this.autoApprovalSettings.enableNotifications) {
 				showSystemNotification({
@@ -2882,6 +2899,7 @@ export class Cline {
 
 		// getting verbose details is an expensive operation, it uses globby to top-down build file structure of project which for large projects can take a few seconds
 		// for the best UX we show a placeholder api_req_started message with a loading spinner as this happens
+		// 开始请求
 		await this.say(
 			"api_req_started",
 			JSON.stringify({
@@ -2892,6 +2910,7 @@ export class Cline {
 		// use this opportunity to initialize the checkpoint tracker (can be expensive to initialize in the constructor)
 		// FIXME: right now we're letting users init checkpoints for old tasks, but this could be a problem if opening a task in the wrong workspace
 		// isNewTask &&
+		// 初始化检查点追踪器
 		if (!this.checkpointTracker) {
 			try {
 				this.checkpointTracker = await CheckpointTracker.create(this.taskId, this.providerRef.deref())
@@ -3010,19 +3029,19 @@ export class Cline {
 						continue
 					}
 					switch (chunk.type) {
-						case "usage":
+						case "usage": // 更新 token 使用情况
 							inputTokens += chunk.inputTokens
 							outputTokens += chunk.outputTokens
 							cacheWriteTokens += chunk.cacheWriteTokens ?? 0
 							cacheReadTokens += chunk.cacheReadTokens ?? 0
 							totalCost = chunk.totalCost
 							break
-						case "reasoning":
+						case "reasoning": // 处理推理过程
 							// reasoning will always come before assistant message
 							reasoningMessage += chunk.reasoning
 							await this.say("reasoning", reasoningMessage, undefined, true)
 							break
-						case "text":
+						case "text": // 处理文本响应
 							if (reasoningMessage && assistantMessage.length === 0) {
 								// complete reasoning message
 								await this.say("reasoning", reasoningMessage, undefined, false)
@@ -3187,10 +3206,12 @@ export class Cline {
 		])
 	}
 
+	// 获取当前环境信息的函数
 	async getEnvironmentDetails(includeFileDetails: boolean = false) {
 		let details = ""
 
 		// It could be useful for cline to know if the user went from one or no file to another between messages, so we always include this context
+		// 获取当前可见文件
 		details += "\n\n# VSCode Visible Files"
 		const visibleFiles = vscode.window.visibleTextEditors
 			?.map((editor) => editor.document?.uri?.fsPath)
@@ -3203,6 +3224,7 @@ export class Cline {
 			details += "\n(No visible files)"
 		}
 
+		// 获取当前打开的所有 Tab
 		details += "\n\n# VSCode Open Tabs"
 		const openTabs = vscode.window.tabGroups.all
 			.flatMap((group) => group.tabs)
@@ -3216,15 +3238,19 @@ export class Cline {
 			details += "\n(No open tabs)"
 		}
 
+		// 获取当前正在运行的终端和非活动终端
 		const busyTerminals = this.terminalManager.getTerminals(true)
 		const inactiveTerminals = this.terminalManager.getTerminals(false)
 		// const allTerminals = [...busyTerminals, ...inactiveTerminals]
+
+		// 如果有正在运行的终端且刚编辑过文件，等待300ms让终端更新
 
 		if (busyTerminals.length > 0 && this.didEditFile) {
 			//  || this.didEditFile
 			await delay(300) // delay after saving file to let terminals catch up
 		}
 
+		// 等待所有繁忙终端冷却
 		// let terminalWasBusy = false
 		if (busyTerminals.length > 0) {
 			// wait for terminals to cool down
@@ -3255,6 +3281,7 @@ export class Cline {
 		this.didEditFile = false // reset, this lets us know when to wait for saved files to update terminals
 
 		// waiting for updated diagnostics lets terminal output be the most up-to-date possible
+		// 收集活动终端输出
 		let terminalDetails = ""
 		if (busyTerminals.length > 0) {
 			// terminals are cool, let's retrieve their output
@@ -3270,6 +3297,7 @@ export class Cline {
 			}
 		}
 		// only show inactive terminals if there's output to show
+		// 收集非活动终端的新输出
 		if (inactiveTerminals.length > 0) {
 			const inactiveTerminalOutputs = new Map<number, string>()
 			for (const inactiveTerminal of inactiveTerminals) {
@@ -3302,6 +3330,7 @@ export class Cline {
 		}
 
 		// Add current time information with timezone
+		// 收集当前时间和时区信息
 		const now = new Date()
 		const formatter = new Intl.DateTimeFormat(undefined, {
 			year: "numeric",
@@ -3317,6 +3346,7 @@ export class Cline {
 		const timeZoneOffsetStr = `${timeZoneOffset >= 0 ? "+" : ""}${timeZoneOffset}:00`
 		details += `\n\n# Current Time\n${formatter.format(now)} (${timeZone}, UTC${timeZoneOffsetStr})`
 
+		// 添加当前工作目录的文件列表
 		if (includeFileDetails) {
 			details += `\n\n# Current Working Directory (${cwd.toPosix()}) Files\n`
 			const isDesktop = arePathsEqual(cwd, path.join(os.homedir(), "Desktop"))
@@ -3330,6 +3360,7 @@ export class Cline {
 			}
 		}
 
+		// 收集当前模式的信息和相关说明
 		details += "\n\n# Current Mode"
 		if (this.chatSettings.mode === "plan") {
 			details += "\nPLAN MODE"

@@ -42,6 +42,7 @@ class CheckpointTracker {
 
 			const cwd = await CheckpointTracker.getWorkingDirectory()
 			const newTracker = new CheckpointTracker(provider, taskId, cwd)
+			// 创建一个影子 Git 仓库
 			await newTracker.initShadowGit()
 			return newTracker
 		} catch (error) {
@@ -271,6 +272,7 @@ class CheckpointTracker {
 		}
 	}
 
+	// 核心回退操作
 	public async resetHead(commitHash: string): Promise<void> {
 		const gitPath = await this.getShadowGitPath()
 		const git = simpleGit(path.dirname(gitPath))

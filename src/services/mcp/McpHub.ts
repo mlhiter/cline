@@ -92,7 +92,7 @@ export class McpHub {
 				mcpSettingsFilePath,
 				`{
   "mcpServers": {
-    
+
   }
 }`,
 			)
@@ -100,6 +100,7 @@ export class McpHub {
 		return mcpSettingsFilePath
 	}
 
+	// 监控 MCP 设置文件的变化，如果变化则更新 connections数组
 	private async watchMcpSettingsFile(): Promise<void> {
 		const settingsPath = await this.getMcpSettingsFilePath()
 		this.disposables.push(

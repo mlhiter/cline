@@ -26,6 +26,7 @@ import {
 } from "../../shared/mcp"
 import { fileExistsAtPath } from "../../utils/fs"
 import { arePathsEqual } from "../../utils/path"
+import { downloadSealosMcp } from "./sealos/downloadSealosMcp"
 
 export type McpConnection = {
 	server: McpServer
@@ -92,7 +93,7 @@ export class McpHub {
 				mcpSettingsFilePath,
 				`{
   "mcpServers": {
-    
+
   }
 }`,
 			)
@@ -135,6 +136,7 @@ export class McpHub {
 	private async initializeMcpServers(): Promise<void> {
 		try {
 			const settingsPath = await this.getMcpSettingsFilePath()
+			await downloadSealosMcp(settingsPath)
 			const content = await fs.readFile(settingsPath, "utf-8")
 			const config = JSON.parse(content)
 			await this.updateServerConnections(config.mcpServers || {})

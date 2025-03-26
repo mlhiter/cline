@@ -4,7 +4,6 @@ import { promisify } from "util"
 import * as vscode from "vscode"
 import * as fs from "fs/promises"
 import { exec } from "child_process"
-import { fileExistsAtPath } from "../../../utils/fs"
 
 const execAsync = promisify(exec)
 
@@ -31,6 +30,7 @@ export const downloadSealosMcp = async (mcpSettingsPath: string) => {
 	const sealosMcpDir = path.join(mcpServersDir, "Sealos") // Specify the storage location as ~/Documents/Cline/MCP/Sealos
 
 	await ensureDirectoryExists(mcpServersDir)
+	await ensureNodeInstalled()
 
 	try {
 		try {
@@ -130,7 +130,6 @@ export const downloadSealosMcp = async (mcpSettingsPath: string) => {
 		// Save the found MCP servers to the configuration file
 		if (mcpServers.length > 0) {
 			await saveMcpServersToConfig(mcpSettingsPath, mcpServers)
-			vscode.window.showInformationMessage(`Added ${mcpServers.length} MCP servers to the configuration`)
 		} else {
 			vscode.window.showWarningMessage("No usable MCP servers found")
 		}
@@ -233,18 +232,6 @@ async function saveMcpServersToConfig(
 	}[],
 ) {
 	try {
-		const fileExists = await fileExistsAtPath(mcpSettingsPath)
-		if (!fileExists) {
-			await fs.writeFile(
-				mcpSettingsPath,
-				`{
-  "mcpServers": {
-
-  }
-}`,
-			)
-		}
-
 		// Read the existing configuration or create a new one
 		let mcpSettings: McpSettings = { mcpServers: {} }
 		try {
@@ -271,5 +258,22 @@ async function saveMcpServersToConfig(
 	} catch (error) {
 		console.error("Error saving MCP configuration:", error)
 		throw error
+	}
+}
+
+async function ensureNodeInstalled(): Promise<void> {
+	try {
+		await execAsync("node --version")
+	} catch (error) {
+		try {
+			await execAsync("curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -")
+			await execAsync("sudo apt-get install -y nodejs")
+
+			const { stdout } = await execAsync("node --version")
+			console.log(`Node.js installed: ${stdout.trim()}`)
+		} catch (installError) {
+			console.error("Node.js installation failed:", installError)
+			throw new Error("Failed to install Node.js")
+		}
 	}
 }

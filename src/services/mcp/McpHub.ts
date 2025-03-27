@@ -136,10 +136,28 @@ export class McpHub {
 	private async initializeMcpServers(): Promise<void> {
 		try {
 			const settingsPath = await this.getMcpSettingsFilePath()
-			await downloadSealosMcp(settingsPath)
-			const content = await fs.readFile(settingsPath, "utf-8")
-			const config = JSON.parse(content)
-			await this.updateServerConnections(config.mcpServers || {})
+
+			await vscode.commands.executeCommand("workbench.view.extension.claude-dev-ActivityBar")
+
+			vscode.window.withProgress(
+				{
+					location: vscode.ProgressLocation.Notification,
+					title: "Initializing MCP servers: ",
+					cancellable: false,
+				},
+				async (progress) => {
+					progress.report({ message: "Updating Sealos MCP..." })
+					await downloadSealosMcp(settingsPath)
+
+					progress.report({ message: "Reading configuration..." })
+					const content = await fs.readFile(settingsPath, "utf-8")
+					const config = JSON.parse(content)
+					console.log("config", config)
+
+					progress.report({ message: "Updating server connections..." })
+					await this.updateServerConnections(config.mcpServers || {})
+				},
+			)
 		} catch (error) {
 			console.error("Failed to initialize MCP servers:", error)
 		}

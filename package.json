@@ -15,7 +15,7 @@
 		"name": "mlhiter"
 	},
 	"license": "Apache-2.0",
-	"publisher": "labring",
+	"publisher": "mlhiter",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/labring/sline"

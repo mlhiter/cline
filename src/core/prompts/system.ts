@@ -977,7 +977,7 @@ Because you have some mcp servers called 'sealos-xxx', these mcp servers are act
 
 
 SealosDomain: ${getDevboxInfo()?.sealosDomain}
-Namespace: ${getDevboxInfo()?.ns}
+Namespace: ${getDevboxInfo()?.namespace}
 DevboxName: ${getDevboxInfo()?.devboxName}
 
 `

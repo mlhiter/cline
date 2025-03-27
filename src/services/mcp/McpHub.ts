@@ -137,7 +137,7 @@ export class McpHub {
 		try {
 			const settingsPath = await this.getMcpSettingsFilePath()
 
-			await vscode.commands.executeCommand("workbench.view.extension.claude-dev-ActivityBar")
+			await vscode.commands.executeCommand("workbench.view.extension.sline-ActivityBar")
 
 			vscode.window.withProgress(
 				{
@@ -152,7 +152,6 @@ export class McpHub {
 					progress.report({ message: "Reading configuration..." })
 					const content = await fs.readFile(settingsPath, "utf-8")
 					const config = JSON.parse(content)
-					console.log("config", config)
 
 					progress.report({ message: "Updating server connections..." })
 					await this.updateServerConnections(config.mcpServers || {})

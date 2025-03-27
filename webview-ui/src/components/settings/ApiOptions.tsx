@@ -840,8 +840,8 @@ const ApiOptions = ({ showModelOptions, apiErrorMessage, modelIdErrorMessage, is
 						</label>
 						<VSCodeDropdown
 							id="sealos-base-url"
-							value={apiConfiguration?.openAiBaseUrl || ""}
-							onChange={handleInputChange("openAiBaseUrl")}
+							value={apiConfiguration?.sealosAiProxyBaseUrl || ""}
+							onChange={handleInputChange("sealosAiProxyBaseUrl")}
 							style={{ width: "100%" }}>
 							<VSCodeOption value="">Select a AI Proxy Workspace...</VSCodeOption>
 							<VSCodeOption value="https://aiproxy.usw.sealos.io/v1">Sealos usw</VSCodeOption>
@@ -851,17 +851,17 @@ const ApiOptions = ({ showModelOptions, apiErrorMessage, modelIdErrorMessage, is
 						</VSCodeDropdown>
 					</DropdownContainer>
 					<VSCodeTextField
-						value={apiConfiguration?.openAiApiKey || ""}
+						value={apiConfiguration?.sealosAiProxyApiKey || ""}
 						style={{ width: "100%" }}
 						type="password"
-						onInput={handleInputChange("openAiApiKey")}
+						onInput={handleInputChange("sealosAiProxyApiKey")}
 						placeholder="Enter API Key...">
 						<span style={{ fontWeight: 500 }}>API Key</span>
 					</VSCodeTextField>
 					<VSCodeTextField
-						value={apiConfiguration?.openAiModelId || ""}
+						value={apiConfiguration?.sealosAiProxyModelId || ""}
 						style={{ width: "100%" }}
-						onInput={handleInputChange("openAiModelId")}
+						onInput={handleInputChange("sealosAiProxyModelId")}
 						placeholder={"Enter Model ID..."}>
 						<span style={{ fontWeight: 500 }}>Model ID</span>
 					</VSCodeTextField>

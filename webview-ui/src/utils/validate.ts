@@ -53,6 +53,15 @@ export function validateApiConfiguration(apiConfiguration?: ApiConfiguration): s
 					return "You must provide a valid base URL, API key, and model ID."
 				}
 				break
+			case "sealos-ai-proxy":
+				if (
+					!apiConfiguration.sealosAiProxyBaseUrl ||
+					!apiConfiguration.sealosAiProxyApiKey ||
+					!apiConfiguration.sealosAiProxyModelId
+				) {
+					return "You must provide a valid base URL, API key, and model ID."
+				}
+				break
 			case "requesty":
 				if (!apiConfiguration.requestyApiKey || !apiConfiguration.requestyModelId) {
 					return "You must provide a valid API key or choose a different provider."

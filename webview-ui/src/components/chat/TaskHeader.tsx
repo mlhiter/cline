@@ -44,7 +44,7 @@ const TaskHeader: React.FC<TaskHeaderProps> = ({
 	const contextWindow = selectedModelInfo?.contextWindow
 
 	/*
-	When dealing with event listeners in React components that depend on state variables, we face a challenge. We want our listener to always use the most up-to-date version of a callback function that relies on current state, but we don't want to constantly add and remove event listeners as that function updates. This scenario often arises with resize listeners or other window events. Simply adding the listener in a useEffect with an empty dependency array risks using stale state, while including the callback in the dependencies can lead to unnecessary re-registrations of the listener. There are react hook libraries that provide a elegant solution to this problem by utilizing the useRef hook to maintain a reference to the latest callback function without triggering re-renders or effect re-runs. This approach ensures that our event listener always has access to the most current state while minimizing performance overhead and potential memory leaks from multiple listener registrations. 
+	When dealing with event listeners in React components that depend on state variables, we face a challenge. We want our listener to always use the most up-to-date version of a callback function that relies on current state, but we don't want to constantly add and remove event listeners as that function updates. This scenario often arises with resize listeners or other window events. Simply adding the listener in a useEffect with an empty dependency array risks using stale state, while including the callback in the dependencies can lead to unnecessary re-registrations of the listener. There are react hook libraries that provide a elegant solution to this problem by utilizing the useRef hook to maintain a reference to the latest callback function without triggering re-renders or effect re-runs. This approach ensures that our event listener always has access to the most current state while minimizing performance overhead and potential memory leaks from multiple listener registrations.
 	Sources
 	- https://usehooks-ts.com/react-hook/use-event-listener
 	- https://streamich.github.io/react-use/?path=/story/sensors-useevent--docs
@@ -52,7 +52,7 @@ const TaskHeader: React.FC<TaskHeaderProps> = ({
 	- https://stackoverflow.com/questions/55565444/how-to-register-event-with-useeffect-hooks
 
 	Before:
-	
+
 	const updateMaxHeight = useCallback(() => {
 		if (isExpanded && textContainerRef.current) {
 			const maxHeight = window.innerHeight * (3 / 5)
@@ -107,13 +107,20 @@ const TaskHeader: React.FC<TaskHeaderProps> = ({
 		if (openAiCompatHasPricing) {
 			return true
 		}
+		const sealosAiProxyHasPricing =
+			apiConfiguration?.apiProvider === "sealos-ai-proxy" &&
+			apiConfiguration?.sealosAiProxyModelInfo?.inputPrice &&
+			apiConfiguration?.sealosAiProxyModelInfo?.outputPrice
+		if (sealosAiProxyHasPricing) {
+			return true
+		}
 		return (
 			apiConfiguration?.apiProvider !== "vscode-lm" &&
 			apiConfiguration?.apiProvider !== "ollama" &&
 			apiConfiguration?.apiProvider !== "lmstudio" &&
 			apiConfiguration?.apiProvider !== "gemini"
 		)
-	}, [apiConfiguration?.apiProvider, apiConfiguration?.openAiModelInfo])
+	}, [apiConfiguration?.apiProvider, apiConfiguration?.openAiModelInfo, apiConfiguration?.sealosAiProxyModelInfo])
 
 	const shouldShowPromptCacheInfo = doesModelSupportPromptCache && apiConfiguration?.apiProvider !== "openrouter"
 

@@ -17,6 +17,7 @@ import { QwenHandler } from "./providers/qwen"
 import { MistralHandler } from "./providers/mistral"
 import { VsCodeLmHandler } from "./providers/vscode-lm"
 import { LiteLlmHandler } from "./providers/litellm"
+import { SealosAiProxyHandler } from "./providers/sealos-ai-proxy"
 
 export interface ApiHandler {
 	createMessage(systemPrompt: string, messages: Anthropic.Messages.MessageParam[]): ApiStream
@@ -40,6 +41,8 @@ export function buildApiHandler(configuration: ApiConfiguration): ApiHandler {
 			return new VertexHandler(options)
 		case "openai":
 			return new OpenAiHandler(options)
+		case "sealos-ai-proxy":
+			return new SealosAiProxyHandler(options)
 		case "ollama":
 			return new OllamaHandler(options)
 		case "lmstudio":

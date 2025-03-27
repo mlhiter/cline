@@ -57,6 +57,10 @@ export interface ApiHandlerOptions {
 	vsCodeLmModelSelector?: any
 	o3MiniReasoningEffort?: string
 	qwenApiLine?: string
+	sealosAiProxyBaseUrl?: string
+	sealosAiProxyApiKey?: string
+	sealosAiProxyModelId?: string
+	sealosAiProxyModelInfo?: ModelInfo
 }
 
 export type ApiConfiguration = ApiHandlerOptions & {

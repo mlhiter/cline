@@ -46,6 +46,7 @@ type SecretKey =
 	| "awsSecretKey"
 	| "awsSessionToken"
 	| "openAiApiKey"
+	| "sealosAiProxyApiKey"
 	| "geminiApiKey"
 	| "openAiNativeApiKey"
 	| "deepSeekApiKey"
@@ -71,6 +72,10 @@ type GlobalStateKey =
 	| "openAiBaseUrl"
 	| "openAiModelId"
 	| "openAiModelInfo"
+	| "sealosAiProxyBaseUrl"
+	| "sealosAiProxyApiKey"
+	| "sealosAiProxyModelId"
+	| "sealosAiProxyModelInfo"
 	| "ollamaModelId"
 	| "ollamaBaseUrl"
 	| "lmStudioModelId"
@@ -461,6 +466,10 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 								openAiBaseUrl,
 								openAiApiKey,
 								openAiModelId,
+								sealosAiProxyBaseUrl,
+								sealosAiProxyApiKey,
+								sealosAiProxyModelId,
+								sealosAiProxyModelInfo,
 								openAiModelInfo,
 								ollamaModelId,
 								ollamaBaseUrl,
@@ -502,6 +511,10 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 							await this.storeSecret("openAiApiKey", openAiApiKey)
 							await this.updateGlobalState("openAiModelId", openAiModelId)
 							await this.updateGlobalState("openAiModelInfo", openAiModelInfo)
+							await this.updateGlobalState("sealosAiProxyBaseUrl", sealosAiProxyBaseUrl)
+							await this.storeSecret("sealosAiProxyApiKey", sealosAiProxyApiKey)
+							await this.updateGlobalState("sealosAiProxyModelId", sealosAiProxyModelId)
+							await this.updateGlobalState("sealosAiProxyModelInfo", sealosAiProxyModelInfo)
 							await this.updateGlobalState("ollamaModelId", ollamaModelId)
 							await this.updateGlobalState("ollamaBaseUrl", ollamaBaseUrl)
 							await this.updateGlobalState("lmStudioModelId", lmStudioModelId)
@@ -854,6 +867,10 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 				await this.updateGlobalState("previousModeModelId", apiConfiguration.openAiModelId)
 				await this.updateGlobalState("previousModeModelInfo", apiConfiguration.openAiModelInfo)
 				break
+			case "sealos-ai-proxy":
+				await this.updateGlobalState("previousModeModelId", apiConfiguration.sealosAiProxyModelId)
+				await this.updateGlobalState("previousModeModelInfo", apiConfiguration.sealosAiProxyModelInfo)
+				break
 			case "ollama":
 				await this.updateGlobalState("previousModeModelId", apiConfiguration.ollamaModelId)
 				break
@@ -885,6 +902,10 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 				case "openai":
 					await this.updateGlobalState("openAiModelId", newModelId)
 					await this.updateGlobalState("openAiModelInfo", newModelInfo)
+					break
+				case "sealos-ai-proxy":
+					await this.updateGlobalState("sealosAiProxyModelId", newModelId)
+					await this.updateGlobalState("sealosAiProxyModelInfo", newModelInfo)
 					break
 				case "ollama":
 					await this.updateGlobalState("ollamaModelId", newModelId)
@@ -1692,6 +1713,10 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 			previousModeModelInfo,
 			qwenApiLine,
 			liteLlmApiKey,
+			sealosAiProxyBaseUrl,
+			sealosAiProxyApiKey,
+			sealosAiProxyModelId,
+			sealosAiProxyModelInfo,
 		] = await Promise.all([
 			this.getGlobalState("apiProvider") as Promise<ApiProvider | undefined>,
 			this.getGlobalState("apiModelId") as Promise<string | undefined>,
@@ -1743,6 +1768,10 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 			this.getGlobalState("previousModeModelInfo") as Promise<ModelInfo | undefined>,
 			this.getGlobalState("qwenApiLine") as Promise<string | undefined>,
 			this.getSecret("liteLlmApiKey") as Promise<string | undefined>,
+			this.getGlobalState("sealosAiProxyBaseUrl") as Promise<string | undefined>,
+			this.getSecret("sealosAiProxyApiKey") as Promise<string | undefined>,
+			this.getGlobalState("sealosAiProxyModelId") as Promise<string | undefined>,
+			this.getGlobalState("sealosAiProxyModelInfo") as Promise<ModelInfo | undefined>,
 		])
 
 		let apiProvider: ApiProvider
@@ -1805,6 +1834,10 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 				liteLlmBaseUrl,
 				liteLlmModelId,
 				liteLlmApiKey,
+				sealosAiProxyBaseUrl,
+				sealosAiProxyApiKey,
+				sealosAiProxyModelId,
+				sealosAiProxyModelInfo,
 			},
 			lastShownAnnouncementId,
 			customInstructions,
@@ -1890,6 +1923,7 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 			"awsSecretKey",
 			"awsSessionToken",
 			"openAiApiKey",
+			"sealosAiProxyApiKey",
 			"geminiApiKey",
 			"openAiNativeApiKey",
 			"deepSeekApiKey",

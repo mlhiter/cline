@@ -1754,8 +1754,8 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 			if (apiKey) {
 				apiProvider = "anthropic"
 			} else {
-				// New users should default to openrouter
-				apiProvider = "openrouter"
+				// New users should default to sealos-ai-proxy
+				apiProvider = "sealos-ai-proxy"
 			}
 		}
 

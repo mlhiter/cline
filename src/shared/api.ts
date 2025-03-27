@@ -15,6 +15,7 @@ export type ApiProvider =
 	| "mistral"
 	| "vscode-lm"
 	| "litellm"
+	| "sealos-ai-proxy"
 
 export interface ApiHandlerOptions {
 	apiModelId?: string

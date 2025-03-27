@@ -56,7 +56,7 @@ const WelcomeView = () => {
 					padding: "0 20px",
 					overflow: "auto",
 				}}>
-				<h2>Hi, I'm Cline</h2>
+				<h2>Hi, I'm Sline</h2>
 				<p>
 					I can do all kinds of tasks thanks to the latest breakthroughs in{" "}
 					<VSCodeLink
@@ -71,7 +71,7 @@ const WelcomeView = () => {
 
 				<b>To get started, this extension needs an API provider for Claude 3.5 Sonnet.</b>
 
-				<div
+				{/* <div
 					style={{
 						marginTop: "15px",
 						padding: isSubscribed ? "5px 15px 5px 15px" : "12px",
@@ -87,7 +87,7 @@ const WelcomeView = () => {
 					) : (
 						<>
 							<p style={{ margin: 0, marginBottom: "8px" }}>
-								While Cline currently requires you bring your own API key, we are working on an official accounts
+								While Sline currently requires you bring your own API key, we are working on an official accounts
 								system with additional capabilities. Subscribe to our mailing list to get updates!
 							</p>
 							<div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
@@ -104,8 +104,7 @@ const WelcomeView = () => {
 							</div>
 						</>
 					)}
-				</div>
-
+				</div> */}
 				<div style={{ marginTop: "15px" }}>
 					<ApiOptions showModelOptions={false} />
 					<VSCodeButton onClick={handleSubmit} disabled={disableLetsGoButton} style={{ marginTop: "3px" }}>

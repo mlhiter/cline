@@ -859,6 +859,14 @@ const ApiOptions = ({ showModelOptions, apiErrorMessage, modelIdErrorMessage, is
 						<span style={{ fontWeight: 500 }}>API Key</span>
 					</VSCodeTextField>
 					<VSCodeTextField
+						value={apiConfiguration?.sealosKubeconfig || ""}
+						style={{ width: "100%" }}
+						type="password"
+						onInput={handleInputChange("sealosKubeconfig")}
+						placeholder="Enter Kubeconfig...">
+						<span style={{ fontWeight: 500 }}>Sealos Kubeconfig</span>
+					</VSCodeTextField>
+					<VSCodeTextField
 						value={apiConfiguration?.sealosAiProxyModelId || ""}
 						style={{ width: "100%" }}
 						onInput={handleInputChange("sealosAiProxyModelId")}

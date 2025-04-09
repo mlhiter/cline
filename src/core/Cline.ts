@@ -2451,7 +2451,16 @@ export class Cline {
 					case "use_mcp_tool": {
 						const server_name: string | undefined = block.params.server_name
 						const tool_name: string | undefined = block.params.tool_name
-						const mcp_arguments: string | undefined = block.params.arguments
+						const initial_mcp_arguments: string | undefined = block.params.arguments
+						let mcp_arguments: string | undefined
+
+						if (server_name?.startsWith("sealos")) {
+							mcp_arguments = JSON.stringify({
+								...JSON.parse(initial_mcp_arguments ?? "{}"),
+								kubeconfig: await this.providerRef.deref()?.getSecret("sealosKubeconfig"),
+							})
+						}
+
 						try {
 							if (block.partial) {
 								const partialMessage = JSON.stringify({
@@ -2908,7 +2917,7 @@ export class Cline {
 		}
 
 		/*
-		Seeing out of bounds is fine, it means that the next too call is being built up and ready to add to assistantMessageContent to present. 
+		Seeing out of bounds is fine, it means that the next too call is being built up and ready to add to assistantMessageContent to present.
 		When you see the UI inactive during this, it means that a tool is breaking without presenting any UI. For example the write_to_file tool was breaking when relpath was undefined, and for invalid relpath it never presented UI.
 		*/
 		this.presentAssistantMessageLocked = false // this needs to be placed here, if not then calling this.presentAssistantMessage below would fail (sometimes) since it's locked

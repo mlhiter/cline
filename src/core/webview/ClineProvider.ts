@@ -47,6 +47,7 @@ type SecretKey =
 	| "awsSessionToken"
 	| "openAiApiKey"
 	| "sealosAiProxyApiKey"
+	| "sealosKubeconfig"
 	| "geminiApiKey"
 	| "openAiNativeApiKey"
 	| "deepSeekApiKey"
@@ -468,6 +469,7 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 								openAiModelId,
 								sealosAiProxyBaseUrl,
 								sealosAiProxyApiKey,
+								sealosKubeconfig,
 								sealosAiProxyModelId,
 								sealosAiProxyModelInfo,
 								openAiModelInfo,
@@ -513,6 +515,7 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 							await this.updateGlobalState("openAiModelInfo", openAiModelInfo)
 							await this.updateGlobalState("sealosAiProxyBaseUrl", sealosAiProxyBaseUrl)
 							await this.storeSecret("sealosAiProxyApiKey", sealosAiProxyApiKey)
+							await this.storeSecret("sealosKubeconfig", sealosKubeconfig)
 							await this.updateGlobalState("sealosAiProxyModelId", sealosAiProxyModelId)
 							await this.updateGlobalState("sealosAiProxyModelInfo", sealosAiProxyModelInfo)
 							await this.updateGlobalState("ollamaModelId", ollamaModelId)
@@ -1717,6 +1720,7 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 			sealosAiProxyApiKey,
 			sealosAiProxyModelId,
 			sealosAiProxyModelInfo,
+			sealosKubeconfig,
 		] = await Promise.all([
 			this.getGlobalState("apiProvider") as Promise<ApiProvider | undefined>,
 			this.getGlobalState("apiModelId") as Promise<string | undefined>,
@@ -1772,6 +1776,7 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 			this.getSecret("sealosAiProxyApiKey") as Promise<string | undefined>,
 			this.getGlobalState("sealosAiProxyModelId") as Promise<string | undefined>,
 			this.getGlobalState("sealosAiProxyModelInfo") as Promise<ModelInfo | undefined>,
+			this.getSecret("sealosKubeconfig") as Promise<string | undefined>,
 		])
 
 		let apiProvider: ApiProvider
@@ -1836,6 +1841,7 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 				liteLlmApiKey,
 				sealosAiProxyBaseUrl,
 				sealosAiProxyApiKey,
+				sealosKubeconfig,
 				sealosAiProxyModelId,
 				sealosAiProxyModelInfo,
 			},
@@ -1924,6 +1930,7 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 			"awsSessionToken",
 			"openAiApiKey",
 			"sealosAiProxyApiKey",
+			"sealosKubeconfig",
 			"geminiApiKey",
 			"openAiNativeApiKey",
 			"deepSeekApiKey",

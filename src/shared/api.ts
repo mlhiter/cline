@@ -65,6 +65,7 @@ export interface ApiHandlerOptions {
 
 export type ApiConfiguration = ApiHandlerOptions & {
 	apiProvider?: ApiProvider
+	sealosKubeconfig?: string
 }
 
 // Models

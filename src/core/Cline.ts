@@ -1264,7 +1264,13 @@ export class Cline {
 
 		const supportsComputerUse = modelSupportsComputerUse && !disableBrowserTool // only enable computer use if the model supports it and the user hasn't disabled it
 
-		let systemPrompt = await SYSTEM_PROMPT(cwd, supportsComputerUse, mcpHub, this.browserSettings)
+		let systemPrompt = await SYSTEM_PROMPT(
+			cwd,
+			supportsComputerUse,
+			mcpHub,
+			this.browserSettings,
+			(await this.providerRef.deref()?.getSecret("sealosKubeconfig")) ?? "",
+		)
 
 		let settingsCustomInstructions = this.customInstructions?.trim()
 		const clineRulesFilePath = path.resolve(cwd, GlobalFileNames.clineRules)

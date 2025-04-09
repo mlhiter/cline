@@ -271,6 +271,7 @@
 		"tree-sitter-wasms": "^0.1.11",
 		"turndown": "^7.2.0",
 		"web-tree-sitter": "^0.22.6",
+		"yaml": "^2.7.1",
 		"zod": "^3.24.2"
 	}
 }

@@ -1,15 +1,16 @@
 import { getShell } from "../../utils/shell"
 import os from "os"
 import osName from "os-name"
+import { getDevboxEnvInfo } from "../../utils/kc"
 import { McpHub } from "../../services/mcp/McpHub"
 import { BrowserSettings } from "../../shared/BrowserSettings"
-import { getDevboxInfo } from "../../utils/devbox"
 
 export const SYSTEM_PROMPT = async (
 	cwd: string,
 	supportsComputerUse: boolean,
 	mcpHub: McpHub,
 	browserSettings: BrowserSettings,
+	kubeconfig: string,
 ) => `You are Sline, a highly skilled software engineer with extensive knowledge in many programming languages, frameworks, design patterns, and best practices.
 
 ====
@@ -963,9 +964,6 @@ Operating System: ${osName()}
 Default Shell: ${getShell()}
 Home Directory: ${os.homedir().toPosix()}
 Current Working Directory: ${cwd.toPosix()}
-${
-	getDevboxInfo() !== null
-		? `
 
 You are running in a Remote Development environment called Devbox. It is a platform for running development environments in the cloud based on a Kubernetes cluster.
 
@@ -973,16 +971,13 @@ Because you have some mcp servers called 'sealos-xxx', these mcp servers are act
 
 - SealosDomain: The main domain of the Devbox cluster, such as usw.sealos.io.
 - Namespace: The namespace of the Devbox cluster, such as ns-admin.
-- DevboxName: The name of the Devbox instance, such as devbox-1.
+- Server: The server URL of the Devbox cluster, such as https://hzh.sealos.run:6443.
+- User: The user token of the Devbox cluster.
 
-
-SealosDomain: ${getDevboxInfo()?.sealosDomain}
-Namespace: ${getDevboxInfo()?.namespace}
-DevboxName: ${getDevboxInfo()?.devboxName}
-
-`
-		: ""
-}
+SealosDomain: ${getDevboxEnvInfo(kubeconfig).sealosDomain}
+Namespace: ${getDevboxEnvInfo(kubeconfig).namespace}
+Server: ${getDevboxEnvInfo(kubeconfig).server}
+User: ${getDevboxEnvInfo(kubeconfig).user}
 
 ====
 

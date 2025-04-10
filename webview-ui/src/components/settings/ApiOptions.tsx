@@ -6,6 +6,7 @@ import {
 	VSCodeRadio,
 	VSCodeRadioGroup,
 	VSCodeTextField,
+	VSCodeTextArea,
 } from "@vscode/webview-ui-toolkit/react"
 import { Fragment, memo, useCallback, useEffect, useMemo, useState } from "react"
 import { useEvent, useInterval } from "react-use"
@@ -858,14 +859,13 @@ const ApiOptions = ({ showModelOptions, apiErrorMessage, modelIdErrorMessage, is
 						placeholder="Enter API Key...">
 						<span style={{ fontWeight: 500 }}>API Key</span>
 					</VSCodeTextField>
-					<VSCodeTextField
+					<VSCodeTextArea
 						value={apiConfiguration?.sealosKubeconfig || ""}
 						style={{ width: "100%" }}
-						type="password"
 						onInput={handleInputChange("sealosKubeconfig")}
 						placeholder="Enter Kubeconfig...">
 						<span style={{ fontWeight: 500 }}>Sealos Kubeconfig</span>
-					</VSCodeTextField>
+					</VSCodeTextArea>
 					<VSCodeTextField
 						value={apiConfiguration?.sealosAiProxyModelId || ""}
 						style={{ width: "100%" }}

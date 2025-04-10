@@ -2457,15 +2457,7 @@ export class Cline {
 					case "use_mcp_tool": {
 						const server_name: string | undefined = block.params.server_name
 						const tool_name: string | undefined = block.params.tool_name
-						const initial_mcp_arguments: string | undefined = block.params.arguments
-						let mcp_arguments: string | undefined
-
-						if (server_name?.startsWith("sealos")) {
-							mcp_arguments = JSON.stringify({
-								...JSON.parse(initial_mcp_arguments ?? "{}"),
-								kubeconfig: await this.providerRef.deref()?.getSecret("sealosKubeconfig"),
-							})
-						}
+						const mcp_arguments: string | undefined = block.params.arguments
 
 						try {
 							if (block.partial) {
@@ -2507,7 +2499,10 @@ export class Cline {
 								let parsedArguments: Record<string, unknown> | undefined
 								if (mcp_arguments) {
 									try {
-										parsedArguments = JSON.parse(mcp_arguments)
+										parsedArguments = {
+											...JSON.parse(mcp_arguments),
+											kubeconfig: await this.providerRef.deref()?.getSecret("sealosKubeconfig"),
+										}
 									} catch (error) {
 										this.consecutiveMistakeCount++
 										await this.say(
@@ -2524,11 +2519,17 @@ export class Cline {
 									}
 								}
 								this.consecutiveMistakeCount = 0
+
 								const completeMessage = JSON.stringify({
 									type: "use_mcp_tool",
 									serverName: server_name,
 									toolName: tool_name,
-									arguments: mcp_arguments,
+									arguments: server_name.startsWith("sealos")
+										? JSON.stringify({
+												...JSON.parse(mcp_arguments ?? "{}"),
+												kubeconfig: await this.providerRef.deref()?.getSecret("sealosKubeconfig"),
+											})
+										: mcp_arguments,
 								} satisfies ClineAskUseMcpServer)
 
 								const isToolAutoApproved = this.providerRef

@@ -1,8 +1,15 @@
-import React, { createContext, useCallback, useContext, useEffect, useState } from "react"
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react"
 import { useEvent } from "react-use"
 import { DEFAULT_AUTO_APPROVAL_SETTINGS } from "../../../src/shared/AutoApprovalSettings"
 import { ExtensionMessage, ExtensionState, DEFAULT_PLATFORM } from "../../../src/shared/ExtensionMessage"
-import { ApiConfiguration, ModelInfo, openRouterDefaultModelId, openRouterDefaultModelInfo } from "../../../src/shared/api"
+import {
+	ApiConfiguration,
+	ModelInfo,
+	openRouterDefaultModelId,
+	openRouterDefaultModelInfo,
+	sealosAiProxyDefaultModelId,
+	sealosAiProxyDefaultModelIdCN,
+} from "../../../src/shared/api"
 import { findLastIndex } from "../../../src/shared/array"
 import { McpMarketplaceCatalog, McpServer } from "../../../src/shared/mcp"
 import { convertTextMateToHljs } from "../utils/textMateToHljs"
@@ -15,6 +22,7 @@ interface ExtensionStateContextType extends ExtensionState {
 	showWelcome: boolean
 	theme: any
 	openRouterModels: Record<string, ModelInfo>
+	sealosAiProxyModels: Record<string, Object>
 	openAiModels: string[]
 	mcpServers: McpServer[]
 	mcpMarketplaceCatalog: McpMarketplaceCatalog
@@ -46,6 +54,17 @@ export const ExtensionStateContextProvider: React.FC<{
 	const [filePaths, setFilePaths] = useState<string[]>([])
 	const [openRouterModels, setOpenRouterModels] = useState<Record<string, ModelInfo>>({
 		[openRouterDefaultModelId]: openRouterDefaultModelInfo,
+	})
+	const currentSealosProxyDefaultModelId = useMemo(() => {
+		const apiConfiguration = state.apiConfiguration
+		if (apiConfiguration?.sealosAiProxyBaseUrl?.includes("usw")) {
+			return sealosAiProxyDefaultModelId
+		}
+		return sealosAiProxyDefaultModelIdCN
+	}, [state.apiConfiguration])
+
+	const [sealosAiProxyModels, setSealosAiProxyModels] = useState<Record<string, Object>>({
+		[currentSealosProxyDefaultModelId]: {}, // NOTE: now sealos don not have model info, so we store the null object
 	})
 
 	const [openAiModels, setOpenAiModels] = useState<string[]>([])
@@ -114,6 +133,14 @@ export const ExtensionStateContextProvider: React.FC<{
 				})
 				break
 			}
+			case "sealosAiProxyModels": {
+				const updatedModels = message.sealosAiProxyModels ?? {}
+				setSealosAiProxyModels({
+					[currentSealosProxyDefaultModelId]: {}, // in case the extension sent a model list without the default model
+					...updatedModels,
+				})
+				break
+			}
 			case "openAiModels": {
 				const updatedModels = message.openAiModels ?? []
 				setOpenAiModels(updatedModels)
@@ -144,6 +171,7 @@ export const ExtensionStateContextProvider: React.FC<{
 		showWelcome,
 		theme,
 		openRouterModels,
+		sealosAiProxyModels,
 		openAiModels,
 		mcpServers,
 		mcpMarketplaceCatalog,

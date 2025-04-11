@@ -21,6 +21,7 @@ export interface ExtensionMessage {
 		| "invoke"
 		| "partialMessage"
 		| "openRouterModels"
+		| "sealosAiProxyModels"
 		| "openAiModels"
 		| "mcpServers"
 		| "relinquishControl"
@@ -48,6 +49,7 @@ export interface ExtensionMessage {
 	filePaths?: string[]
 	partialMessage?: ClineMessage
 	openRouterModels?: Record<string, ModelInfo>
+	sealosAiProxyModels?: Record<string, Object>
 	openAiModels?: string[]
 	mcpServers?: McpServer[]
 	mcpMarketplaceCatalog?: McpMarketplaceCatalog

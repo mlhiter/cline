@@ -1,4 +1,9 @@
-import { ApiConfiguration, openRouterDefaultModelId } from "../../../src/shared/api"
+import {
+	ApiConfiguration,
+	openRouterDefaultModelId,
+	sealosAiProxyDefaultModelId,
+	sealosAiProxyDefaultModelIdCN,
+} from "../../../src/shared/api"
 import { ModelInfo } from "../../../src/shared/api"
 export function validateApiConfiguration(apiConfiguration?: ApiConfiguration): string | undefined {
 	if (apiConfiguration) {
@@ -95,15 +100,31 @@ export function validateApiConfiguration(apiConfiguration?: ApiConfiguration): s
 export function validateModelId(
 	apiConfiguration?: ApiConfiguration,
 	openRouterModels?: Record<string, ModelInfo>,
+	sealosAiProxyModels?: Record<string, Object>,
 ): string | undefined {
 	if (apiConfiguration) {
+		let modelId = undefined
 		switch (apiConfiguration.apiProvider) {
 			case "openrouter":
-				const modelId = apiConfiguration.openRouterModelId || openRouterDefaultModelId // in case the user hasn't changed the model id, it will be undefined by default
+				modelId = apiConfiguration.openRouterModelId || openRouterDefaultModelId // in case the user hasn't changed the model id, it will be undefined by default
 				if (!modelId) {
 					return "You must provide a model ID."
 				}
 				if (openRouterModels && !Object.keys(openRouterModels).includes(modelId)) {
+					// even if the model list endpoint failed, extensionstatecontext will always have the default model info
+					return "The model ID you provided is not available. Please choose a different model."
+				}
+				break
+			case "sealos-ai-proxy":
+				modelId =
+					apiConfiguration.sealosAiProxyModelId ||
+					(apiConfiguration.sealosAiProxyBaseUrl?.includes("usw")
+						? sealosAiProxyDefaultModelId
+						: sealosAiProxyDefaultModelIdCN) // in case the user hasn't changed the model id, it will be undefined by default
+				if (!modelId) {
+					return "You must provide a model ID."
+				}
+				if (sealosAiProxyModels && !Object.keys(sealosAiProxyModels).includes(modelId)) {
 					// even if the model list endpoint failed, extensionstatecontext will always have the default model info
 					return "The model ID you provided is not available. Please choose a different model."
 				}

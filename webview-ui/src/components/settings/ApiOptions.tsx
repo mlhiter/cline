@@ -43,6 +43,7 @@ import OpenRouterModelPicker, { ModelDescriptionMarkdown } from "./OpenRouterMod
 import styled from "styled-components"
 import * as vscodemodels from "vscode"
 import { getAsVar, VSC_DESCRIPTION_FOREGROUND } from "../../utils/vscStyles"
+import SealosAIProxyModelPicker from "./SealosAIProxyModelPicker"
 
 interface ApiOptionsProps {
 	showModelOptions: boolean
@@ -851,6 +852,7 @@ const ApiOptions = ({ showModelOptions, apiErrorMessage, modelIdErrorMessage, is
 							<VSCodeOption value="https://aiproxy.bja.sealos.run/v1">Sealos bja</VSCodeOption>
 						</VSCodeDropdown>
 					</DropdownContainer>
+
 					<VSCodeTextField
 						value={apiConfiguration?.sealosAiProxyApiKey || ""}
 						style={{ width: "100%" }}
@@ -859,20 +861,32 @@ const ApiOptions = ({ showModelOptions, apiErrorMessage, modelIdErrorMessage, is
 						placeholder="Enter API Key...">
 						<span style={{ fontWeight: 500 }}>API Key</span>
 					</VSCodeTextField>
+					{!apiConfiguration?.sealosAiProxyApiKey && (
+						<VSCodeButtonLink
+							href={getSealosAiProxyModelsUrl(apiConfiguration?.sealosAiProxyBaseUrl)}
+							style={{ margin: "5px 0 0 0" }}
+							appearance="secondary">
+							Get Sealos AI Proxy Models
+						</VSCodeButtonLink>
+					)}
 					<VSCodeTextArea
 						value={apiConfiguration?.sealosKubeconfig || ""}
 						style={{ width: "100%" }}
 						onInput={handleInputChange("sealosKubeconfig")}
 						placeholder="Enter Kubeconfig...">
 						<span style={{ fontWeight: 500 }}>Sealos Kubeconfig</span>
+						<p
+							style={{
+								fontSize: "12px",
+								marginTop: 3,
+								color: "var(--vscode-descriptionForeground)",
+							}}>
+							<span style={{ color: "var(--vscode-errorForeground)" }}>
+								(<span style={{ fontWeight: 500 }}>Note:</span> SealosKubeconfig is required for authentication in
+								Sealos MCP integration.)
+							</span>
+						</p>
 					</VSCodeTextArea>
-					<VSCodeTextField
-						value={apiConfiguration?.sealosAiProxyModelId || ""}
-						style={{ width: "100%" }}
-						onInput={handleInputChange("sealosAiProxyModelId")}
-						placeholder={"Enter Model ID..."}>
-						<span style={{ fontWeight: 500 }}>Model ID</span>
-					</VSCodeTextField>
 					<VSCodeCheckbox
 						checked={azureApiVersionSelected}
 						onChange={(e: any) => {
@@ -1337,6 +1351,7 @@ const ApiOptions = ({ showModelOptions, apiErrorMessage, modelIdErrorMessage, is
 				selectedProvider !== "ollama" &&
 				selectedProvider !== "lmstudio" &&
 				selectedProvider !== "vscode-lm" &&
+				selectedProvider !== "sealos-ai-proxy" &&
 				showModelOptions && (
 					<>
 						<DropdownContainer zIndex={DROPDOWN_Z_INDEX - 2} className="dropdown-container">
@@ -1364,6 +1379,7 @@ const ApiOptions = ({ showModelOptions, apiErrorMessage, modelIdErrorMessage, is
 				)}
 
 			{selectedProvider === "openrouter" && showModelOptions && <OpenRouterModelPicker isPopup={isPopup} />}
+			{selectedProvider === "sealos-ai-proxy" && showModelOptions && <SealosAIProxyModelPicker isPopup={isPopup} />}
 
 			{modelIdErrorMessage && (
 				<p
@@ -1381,6 +1397,12 @@ const ApiOptions = ({ showModelOptions, apiErrorMessage, modelIdErrorMessage, is
 
 export function getOpenRouterAuthUrl(uriScheme?: string) {
 	return `https://openrouter.ai/auth?callback_url=${uriScheme || "vscode"}://saoudrizwan.claude-dev/openrouter`
+}
+
+export function getSealosAiProxyModelsUrl(sealosAiProxyBaseUrl?: string) {
+	return sealosAiProxyBaseUrl
+		? sealosAiProxyBaseUrl.replace("aiproxy.", "").replace("/v1", "/openapp=system-aiproxy")
+		: "https://usw.sealos.io/openapp=system-aiproxy"
 }
 
 export const formatPrice = (price: number) => {

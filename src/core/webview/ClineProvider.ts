@@ -104,6 +104,7 @@ export const GlobalFileNames = {
 	apiConversationHistory: "api_conversation_history.json",
 	uiMessages: "ui_messages.json",
 	openRouterModels: "openrouter_models.json",
+	sealosAiProxyModels: "sealosai_proxy_models.json",
 	mcpSettings: "cline_mcp_settings.json",
 	clineRules: ".clinerules",
 }
@@ -408,6 +409,14 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 								})
 							}
 						})
+						this.readSealosAiProxyModels().then((sealosAiProxyModels) => {
+							if (sealosAiProxyModels) {
+								this.postMessageToWebview({
+									type: "sealosAiProxyModels",
+									sealosAiProxyModels,
+								})
+							}
+						})
 						// gui relies on model info to be up-to-date to provide the most accurate pricing, so we need to fetch the latest details on launch.
 						// we do this for all users since many users switch between api providers and if they were to switch back to openrouter it would be showing outdated model info if we hadn't retrieved the latest at this point
 						// (see normalizeApiConfiguration > openrouter)
@@ -634,6 +643,9 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 						break
 					case "refreshOpenRouterModels":
 						await this.refreshOpenRouterModels()
+						break
+					case "refreshSealosAiProxyModels":
+						await this.refreshSealosAiProxyModels()
 						break
 					case "refreshOpenAiModels":
 						const { apiConfiguration } = await this.getState()
@@ -1475,6 +1487,85 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 		await this.postMessageToWebview({
 			type: "openRouterModels",
 			openRouterModels: models,
+		})
+		return models
+	}
+
+	async readSealosAiProxyModels(): Promise<Record<string, Object> | undefined> {
+		const sealosAiProxyModelsFilePath = path.join(
+			await this.ensureCacheDirectoryExists(),
+			GlobalFileNames.sealosAiProxyModels,
+		)
+		const fileExists = await fileExistsAtPath(sealosAiProxyModelsFilePath)
+		if (fileExists) {
+			const fileContents = await fs.readFile(sealosAiProxyModelsFilePath, "utf8")
+			return JSON.parse(fileContents)
+		}
+		return undefined
+	}
+
+	async refreshSealosAiProxyModels() {
+		const sealosAiProxyModelsFilePath = path.join(
+			await this.ensureCacheDirectoryExists(),
+			GlobalFileNames.sealosAiProxyModels,
+		)
+		const sealosAiProxyBaseUrl = await this.getGlobalState("sealosAiProxyBaseUrl")
+
+		let models: Record<string, Object> = {} // NOTE: now sealos don not have model info, so we store the raw object
+		try {
+			const response = await axios.get(`${sealosAiProxyBaseUrl}/models`, {
+				headers: {
+					"Content-Type": "application/json",
+					Authorization: `Bearer ${await this.getSecret("sealosAiProxyApiKey")}`,
+				},
+			})
+			/**
+        {
+          "data": {
+            "parent": null,
+            "id": "claude-3-5-haiku-20241022",
+            "object": "model",
+            "owned_by": "anthropic",
+            "root": "claude-3-5-haiku-20241022",
+            "permission": [
+              {
+                "group": null,
+                "id": "modelperm-LwHkVFn8AcMItP432fKKDIKJ",
+                "object": "model_permission",
+                "organization": "*",
+                "created": 1626777600,
+                "allow_create_engine": true,
+                "allow_sampling": true,
+                "allow_logprobs": true,
+                "allow_search_indices": false,
+                "allow_view": true,
+                "allow_fine_tuning": false,
+                "is_blocking": false
+              }
+            ],
+            "created": 1626777600
+          },
+          "object": "list"
+        }
+       */
+			if (response.data?.data) {
+				const rawModels = response.data.data
+
+				for (const rawModel of rawModels) {
+					models[rawModel.id] = rawModel
+				}
+			} else {
+				console.error("Invalid response from OpenRouter API")
+			}
+			await fs.writeFile(sealosAiProxyModelsFilePath, JSON.stringify(models))
+			console.log("Sealos AI Proxy models fetched and saved", models)
+		} catch (error) {
+			console.error("Error fetching Sealos AI Proxy models:", error)
+		}
+
+		await this.postMessageToWebview({
+			type: "sealosAiProxyModels",
+			sealosAiProxyModels: models,
 		})
 		return models
 	}

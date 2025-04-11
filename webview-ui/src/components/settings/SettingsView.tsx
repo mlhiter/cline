@@ -5,7 +5,7 @@ import { validateApiConfiguration, validateModelId } from "../../utils/validate"
 import { vscode } from "../../utils/vscode"
 import ApiOptions from "./ApiOptions"
 import SettingsButton from "../common/SettingsButton"
-const IS_DEV = false // FIXME: use flags when packaging
+const IS_DEV = true // FIXME: use flags when packaging
 
 type SettingsViewProps = {
 	onDone: () => void
@@ -41,7 +41,7 @@ const SettingsView = ({ onDone }: SettingsViewProps) => {
 	// validate as soon as the component is mounted
 	/*
 	useEffect will use stale values of variables if they are not included in the dependency array. so trying to use useEffect with a dependency array of only one value for example will use any other variables' old values. In most cases you don't want this, and should opt to use react-use hooks.
-	
+
 	useEffect(() => {
 		// uses someVar and anotherVar
 	// eslint-disable-next-line react-hooks/exhaustive-deps

@@ -36,6 +36,14 @@ export function activate(context: vscode.ExtensionContext) {
 		}),
 	)
 
+	// external command: Devbox->Sline,inject kc to global secret
+	context.subscriptions.push(
+		vscode.commands.registerCommand("sline.injectKc", async (args: string) => {
+			await sidebarProvider.storeSecret("sealosKubeconfig", args)
+			Logger.log("Injecting kc to global secret")
+		}),
+	)
+
 	context.subscriptions.push(
 		vscode.commands.registerCommand("sline.plusButtonClicked", async () => {
 			Logger.log("Plus button Clicked")

@@ -1994,7 +1994,7 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 
 	// secrets
 
-	private async storeSecret(key: SecretKey, value?: string) {
+	async storeSecret(key: SecretKey, value?: string) {
 		if (value) {
 			await this.context.secrets.store(key, value)
 		} else {

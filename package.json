@@ -94,6 +94,11 @@
 				"command": "sline.openInNewTab",
 				"title": "Open In New Tab",
 				"category": "Sline"
+			},
+			{
+				"command": "sline.injectKc",
+				"title": "Inject kc to global secret",
+				"category": "Sline"
 			}
 		],
 		"menus": {

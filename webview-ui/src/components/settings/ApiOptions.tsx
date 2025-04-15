@@ -872,6 +872,7 @@ const ApiOptions = ({ showModelOptions, apiErrorMessage, modelIdErrorMessage, is
 					<VSCodeTextArea
 						value={apiConfiguration?.sealosKubeconfig || ""}
 						style={{ width: "100%" }}
+						rows={4}
 						onInput={handleInputChange("sealosKubeconfig")}
 						placeholder="Enter Kubeconfig...">
 						<span style={{ fontWeight: 500 }}>Sealos Kubeconfig</span>

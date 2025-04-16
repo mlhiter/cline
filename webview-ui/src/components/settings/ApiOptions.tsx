@@ -866,13 +866,13 @@ const ApiOptions = ({ showModelOptions, apiErrorMessage, modelIdErrorMessage, is
 							href={getSealosAiProxyModelsUrl(apiConfiguration?.sealosAiProxyBaseUrl)}
 							style={{ margin: "5px 0 0 0" }}
 							appearance="secondary">
-							Get Sealos AI Proxy Models
+							Get Sealos AI Proxy API Key
 						</VSCodeButtonLink>
 					)}
 					<VSCodeTextArea
 						value={apiConfiguration?.sealosKubeconfig || ""}
 						style={{ width: "100%" }}
-						rows={4}
+						rows={3}
 						onInput={handleInputChange("sealosKubeconfig")}
 						placeholder="Enter Kubeconfig...">
 						<span style={{ fontWeight: 500 }}>Sealos Kubeconfig</span>
